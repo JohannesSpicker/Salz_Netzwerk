@@ -14,7 +14,8 @@ namespace MyMultiPlayerGame.Messages
             ChatMessage,
             StartGame,
             StopGame,
-            GameInput
+            GameInput,
+            ReadyMessage,
             //...
         }
 
@@ -61,6 +62,9 @@ namespace MyMultiPlayerGame.Messages
                     break;
                 case MessageTypes.GameInput:
                     m = new GameInput();
+                    break;
+                case MessageTypes.ReadyMessage:
+                    m = new ReadyMessage();
                     break;
             }
 

@@ -62,6 +62,7 @@
     <Compile Include="Game\GameObject.cs" />
     <Compile Include="Game\Soldier.cs" />
     <Compile Include="MessageProtocol.cs" />
+    <Compile Include="Messages\ReadyMessage.cs" />
     <Compile Include="Messages\ChatMessage.cs" />
     <Compile Include="Messages\GameInput.cs" />
     <Compile Include="Messages\MessageBase.cs" />

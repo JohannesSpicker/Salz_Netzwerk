@@ -46,6 +46,9 @@ namespace MyMultiPlayerGame
 
             this.buttonOpenServer.Enabled = false;
             this.buttonConnect.Enabled = false;
+
+            if (myGame.isMeReady)
+                ReadyToggle();
         }
 
         private void buttonOpenServer_Click(object sender, EventArgs e)
@@ -62,6 +65,9 @@ namespace MyMultiPlayerGame
 
             this.buttonOpenServer.Enabled = false;
             this.buttonConnect.Enabled = false;
+
+            if (myGame.isMeReady)
+                ReadyToggle();
         }
 
         private void ConnectionOnMessageReceived(MessageBase message)
@@ -74,11 +80,14 @@ namespace MyMultiPlayerGame
         {
             if (connection != null)
             {
-                connection.Send(new ChatMessage()
+                ChatMessage msg = new ChatMessage()
                 {
-                    Sender = "David",
+                    Sender = textBoxChatName.Text,
                     Text = textBoxChatInput.Text
-                });
+                };
+
+                connection.Send(msg);                            //send chat message to other client
+                DisplayChatmessage(msg.Sender + ": " + msg.Text);//display chat message on this client
             }
         }
 
@@ -90,7 +99,7 @@ namespace MyMultiPlayerGame
                 if (message is ChatMessage)
                 {
                     var c = (ChatMessage)message;
-                    listBoxChat.Items.Add(c.Sender + ": " + c.Text);
+                    DisplayChatmessage(c.Sender + ": " + c.Text);
                 }
                 else if (message is StartGame)
                 {
@@ -102,6 +111,10 @@ namespace MyMultiPlayerGame
                 else if (message is GameInput)
                 {
                     this.myGame.ReceiveGameInput((GameInput)message);
+                }
+                else if (message is ReadyMessage)
+                {
+                    this.myGame.ReceiveReadyInput(this, (ReadyMessage)message);
                 }
             }
         }
@@ -118,6 +131,12 @@ namespace MyMultiPlayerGame
             }));
         }
 
+        public void DisplayChatmessage(string text)
+        {
+            listBoxChat.Items.Add(text);
+            listBoxChat.SelectedIndex = listBoxChat.Items.Count - 1;//scroll the chat down
+        }
+
         private void ApplicationWindow_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (connection != null)
@@ -130,18 +149,47 @@ namespace MyMultiPlayerGame
         {
             if (isServer)
             {
-                this.buttonStartGame.Enabled = false;
-
-                this.BeginInvoke(new Action(() =>
+                if (myGame.isMeReady && myGame.isOppReady)
                 {
-                    myGame.Start(2, 0, new List<NetworkConnection>() {connection});
-                }));
+                    this.buttonStartGame.Enabled = false;
 
-                this.connection.Send(new StartGame()
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        myGame.Start(2, 0, new List<NetworkConnection>() { connection });
+                    }));
+
+                    this.connection.Send(new StartGame()
+                    {
+                        numPlayers = 2,
+                        myPlayerNumber = 1
+                    });
+
+                    buttonReady.Enabled = false;
+                }
+                else
+                    DisplayChatmessage("Both players need to be ready for the game to start.");
+            }
+        }
+
+        private void buttonReady_Click(object sender, EventArgs e) => ReadyToggle();
+
+        private void ReadyToggle()
+        {
+            myGame.isMeReady = !myGame.isMeReady;
+            DisplayChatmessage("You are " + (myGame.isMeReady ? "" : "not ") + "ready.");//display chat message on this client
+
+            buttonReady.Text = myGame.isMeReady ? "Ready" : "Not ready";
+            buttonReady.BackColor = myGame.isMeReady ? Color.Green : Color.Red;
+
+            if (connection != null)
+            {
+                ReadyMessage msg = new ReadyMessage()
                 {
-                    numPlayers = 2,
-                    myPlayerNumber = 1
-                });
+                    Sender = textBoxChatName.Text,
+                    isReady = myGame.isMeReady
+                };
+
+                connection.Send(msg);//send ready message to other client
             }
         }
     }

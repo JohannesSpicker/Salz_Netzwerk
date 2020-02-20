@@ -30,6 +30,19 @@ namespace MyMultiPlayerGame.Game
         InputEvent myInput = null;
         List<NetworkConnection> peers;
 
+        public bool isMeReady = false;
+        public bool isOppReady = false;
+        
+        public void ReceiveReadyInput(ApplicationWindow appWindow, ReadyMessage message)
+        {
+            this.isOppReady = message.isReady;
+            appWindow.DisplayChatmessage(message.Sender + " is " + (this.isOppReady ? "" : "not ") + "ready."); 
+        }
+
+        public void ReadyCheck()
+        {
+        }
+
         public void Start(int numPlayers, int myPlayerNumber, List<NetworkConnection> peers)
         {
             System.Diagnostics.Debug.WriteLine("Start()");
