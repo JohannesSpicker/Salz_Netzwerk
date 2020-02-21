@@ -8,9 +8,17 @@ namespace MyMultiPlayerGame.Game
 {
     class Game
     {
+        public Game(ApplicationWindow appWindow)
+        {
+            this.appWindow = appWindow;
+        }
+
+        ApplicationWindow appWindow;
+
         bool running;
         int simStepCount;
         List<GameObject> allGameObjects = new List<GameObject>();
+        List<Soldier> allSoldiers = new List<Soldier>();
 
         public class InputEvent
         {
@@ -32,15 +40,25 @@ namespace MyMultiPlayerGame.Game
 
         public bool isMeReady = false;
         public bool isOppReady = false;
-        
-        public void ReceiveReadyInput(ApplicationWindow appWindow, ReadyMessage message)
+
+        public int myHealth = 100;
+        public int oppHealth = 100;
+        public float myEnergy
+        {
+            get => myEnergyBackingField;
+            set
+            {
+                myEnergyBackingField = Math.Max(Math.Min(value, 10f), 0f);
+                appWindow.ChangeEnergyLabel();
+            }
+        }
+        private float myEnergyBackingField = 10f;
+
+        public void ReceiveReadyInput(ReadyMessage message)
         {
             this.isOppReady = message.isReady;
-            appWindow.DisplayChatmessage(message.Sender + " is " + (this.isOppReady ? "" : "not ") + "ready."); 
-        }
-
-        public void ReadyCheck()
-        {
+            appWindow.DisplayChatmessage(message.Sender + " is " + (this.isOppReady ? "" : "not ") + "ready.");
+            appWindow.StartTry();
         }
 
         public void Start(int numPlayers, int myPlayerNumber, List<NetworkConnection> peers)
@@ -57,6 +75,7 @@ namespace MyMultiPlayerGame.Game
             this.peers = peers;
 
             this.allGameObjects.Clear();
+
 
             SendInput();
 
@@ -155,11 +174,14 @@ namespace MyMultiPlayerGame.Game
                 var input = this.collectedInputEvents[i];
                 if (input.UnitTypePlaced > 0)
                 {
-                    this.allGameObjects.Add(new Soldier(this, i)
+                    Soldier soldier = new Soldier(this, i, Soldier.SoldierType.CrudeCommoner)
                     {
                         X = input.X,
                         Y = input.Y
-                    });
+                    };
+
+                    this.allGameObjects.Add(soldier);
+                    this.allSoldiers.Add(soldier);
                 }
 
                 this.collectedInputEvents[i] = null;
@@ -170,7 +192,7 @@ namespace MyMultiPlayerGame.Game
 
             foreach (var g in allGameObjects)
             {
-                g.NextSimulationStep();
+                g.NextSimulationStep(this);
             }
 
             SendInput();
@@ -184,6 +206,13 @@ namespace MyMultiPlayerGame.Game
                 {
                     ReceiveGameInput(message);
                 }
+            }
+
+            myEnergy -= 0.1f;//recover energy
+
+            foreach (Soldier soldier in allSoldiers)
+            {
+                soldier.FireTickTock();
             }
         }
 
@@ -208,5 +237,45 @@ namespace MyMultiPlayerGame.Game
             };
         }
 
+        /// <summary>
+        /// Returns the best target and whether it is in shooting range.
+        /// If no fitting targets are available returns shooter.
+        /// </summary>
+        public Tuple<Soldier, bool> FindBestTarget(Soldier shooter)
+        {
+            Soldier bestCandidate = shooter;//best target found so far
+            bool isInAttackRange = false;//found a target in attack range yet?
+
+            foreach (Soldier target in allSoldiers.FindAll(x => x.Player != shooter.Player))
+            {
+                float sqDist = GameObject.SquareDistance(shooter.X, shooter.Y, target.X, target.Y);
+
+                if (sqDist < shooter.FireRange * shooter.FireRange)//enemy in fire range
+                {
+                    if (!isInAttackRange || target.HP < bestCandidate.HP || bestCandidate == shooter)
+                    {
+                        bestCandidate = target;
+                        isInAttackRange = true;
+                    }
+                }
+                else if (!isInAttackRange && sqDist < shooter.ViewRange * shooter.ViewRange)//enemy in view range
+                {
+                    if (target.HP < bestCandidate.HP || bestCandidate == shooter)
+                    {
+                        bestCandidate = target;
+                    }
+                }
+            }
+
+            return new Tuple<Soldier, bool>(bestCandidate, isInAttackRange);
+        }
+
+        public void RemoveSoldierFromlists(Soldier soldier)
+        {
+            if (allGameObjects.Contains(soldier))
+                allGameObjects.Remove(soldier);
+            if (allSoldiers.Contains(soldier))
+                allSoldiers.Remove(soldier);
+        }
     }
 }

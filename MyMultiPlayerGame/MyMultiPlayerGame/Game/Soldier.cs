@@ -1,9 +1,13 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace MyMultiPlayerGame.Game
 {
     class Soldier : GameObject
     {
+        public enum SoldierType { AchyArcher, BlindBertha, CrudeCommoner }
+
+        public SoldierType Type { get; private set; }
         public int HP { get; private set; }
         public float Speed { get; private set; }
         public float ViewRange { get; private set; }
@@ -11,30 +15,93 @@ namespace MyMultiPlayerGame.Game
         public float FireFrequency { get; private set; }
         public int Damage { get; private set; }
         public int Player { get; private set; }
+        public int EnemyPlayer { get => Player + 1 % 2; }//holds true for two players
+        public float FireTicker { get; private set; }
+        private bool ShotReady { get => FireTicker < 0f; }
 
-        public Soldier(Game game, int player)
+        public Soldier(Game game, int player, SoldierType type)
             : base(game)
         {
-            this.Player = player;
-            this.HP = 10;
-            this.Speed = 5;
-            this.Damage = 3;
-            this.FireFrequency = 0.5f;
-            this.ViewRange = 200;
-            this.FireRange = 100;
+            switch (type)
+            {
+                case SoldierType.AchyArcher:
+                    this.Type = type;
+                    this.Player = player;
+                    this.HP = 5;
+                    this.Speed = 4;
+                    this.Damage = 3;
+                    this.FireFrequency = 0.75f;
+                    this.ViewRange = 400;
+                    this.FireRange = 200;
+                    this.FireTicker = this.FireFrequency;
+                    break;
+                case SoldierType.BlindBertha:
+                    this.Type = type;
+                    this.Player = player;
+                    this.HP = 30;
+                    this.Speed = 2;
+                    this.Damage = 5;
+                    this.FireFrequency = 1.5f;
+                    this.ViewRange = 100;
+                    this.FireRange = 50;
+                    this.FireTicker = this.FireFrequency;
+                    break;
+                case SoldierType.CrudeCommoner:
+                    this.Type = type;
+                    this.Player = player;
+                    this.HP = 10;
+                    this.Speed = 5;
+                    this.Damage = 3;
+                    this.FireFrequency = 0.5f;
+                    this.ViewRange = 200;
+                    this.FireRange = 100;
+                    this.FireTicker = this.FireFrequency;
+                    break;
+                default:
+                    this.Type = type;
+                    this.Player = player;
+                    this.HP = 10;
+                    this.Speed = 5;
+                    this.Damage = 3;
+                    this.FireFrequency = 0.5f;
+                    this.ViewRange = 200;
+                    this.FireRange = 100;
+                    this.FireTicker = this.FireFrequency;
+                    break;
+            }
         }
 
-        public override void NextSimulationStep()
+        public override void NextSimulationStep(Game myGame)
         {
             if ((this.Player == 0 && this.X + this.FireRange >= this.Game.boardWidth) ||
                 (this.Player == 1 && this.X - this.FireRange <= 0))
             {
                 // enemy player in range!
+                if (ShotReady)
+                {
+                    //shoot enemy player
+                    ResetFireTicker();
+                }
 
+                return;
             }
-            else
+
+            Tuple<Soldier, bool> target = Game.FindBestTarget(this);
+
+            if (target.Item2)//target is in attack range
             {
-                // move to opponent
+                if (ShotReady)
+                {
+                    target.Item1.TakeDamage(Damage);
+                    ResetFireTicker();
+                }
+            }
+            else if (target.Item1 != this)//target is in view range
+            {
+                Move(target.Item1.X, target.Item1.Y, Speed);
+            }
+            else//go to enemy player
+            {
                 if (this.Player == 0)
                     this.X += this.Speed;
                 else
@@ -47,7 +114,21 @@ namespace MyMultiPlayerGame.Game
             const float radius = 10;
 
             g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
+
+            //TODO: INSERT RENDER SWITCH
         }
 
+        public void FireTickTock() => FireTicker -= 0.1f;
+        private void ResetFireTicker() => FireTicker = FireFrequency;
+
+        public void TakeDamage(int dmg)
+        {
+            HP -= dmg;
+
+            if (HP <= 0)
+                Die();
+        }
+
+        private void Die() => Game.RemoveSoldierFromlists(this);
     }
 }

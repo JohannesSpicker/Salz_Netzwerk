@@ -40,6 +40,9 @@
             this.buttonStartGame = new System.Windows.Forms.Button();
             this.textBoxChatName = new System.Windows.Forms.TextBox();
             this.buttonReady = new System.Windows.Forms.Button();
+            this.labelHealthMe = new System.Windows.Forms.Label();
+            this.labelHealthEnemy = new System.Windows.Forms.Label();
+            this.labelMyEnergy = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // buttonConnect
@@ -146,11 +149,45 @@
             this.buttonReady.UseVisualStyleBackColor = true;
             this.buttonReady.Click += new System.EventHandler(this.buttonReady_Click);
             // 
+            // labelHealthMe
+            // 
+            this.labelHealthMe.AutoSize = true;
+            this.labelHealthMe.Location = new System.Drawing.Point(948, 176);
+            this.labelHealthMe.Name = "labelHealthMe";
+            this.labelHealthMe.Size = new System.Drawing.Size(112, 20);
+            this.labelHealthMe.TabIndex = 10;
+            this.labelHealthMe.Text = "My health: 100";
+            // 
+            // labelHealthEnemy
+            // 
+            this.labelHealthEnemy.AutoSize = true;
+            this.labelHealthEnemy.ForeColor = System.Drawing.Color.Black;
+            this.labelHealthEnemy.Location = new System.Drawing.Point(948, 230);
+            this.labelHealthEnemy.Name = "labelHealthEnemy";
+            this.labelHealthEnemy.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.labelHealthEnemy.Size = new System.Drawing.Size(144, 20);
+            this.labelHealthEnemy.TabIndex = 11;
+            this.labelHealthEnemy.Text = "Enemy Health: 100";
+            this.labelHealthEnemy.Click += new System.EventHandler(this.label3_Click);
+            // 
+            // labelMyEnergy
+            // 
+            this.labelMyEnergy.AutoSize = true;
+            this.labelMyEnergy.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.labelMyEnergy.Location = new System.Drawing.Point(948, 350);
+            this.labelMyEnergy.Name = "labelMyEnergy";
+            this.labelMyEnergy.Size = new System.Drawing.Size(85, 20);
+            this.labelMyEnergy.TabIndex = 12;
+            this.labelMyEnergy.Text = "Energy: 10";
+            // 
             // ApplicationWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1244, 966);
+            this.Controls.Add(this.labelMyEnergy);
+            this.Controls.Add(this.labelHealthEnemy);
+            this.Controls.Add(this.labelHealthMe);
             this.Controls.Add(this.buttonReady);
             this.Controls.Add(this.textBoxChatName);
             this.Controls.Add(this.buttonStartGame);
@@ -183,6 +220,9 @@
         private System.Windows.Forms.Button buttonStartGame;
         private System.Windows.Forms.TextBox textBoxChatName;
         private System.Windows.Forms.Button buttonReady;
+        private System.Windows.Forms.Label labelHealthMe;
+        private System.Windows.Forms.Label labelHealthEnemy;
+        private System.Windows.Forms.Label labelMyEnergy;
     }
 }
 

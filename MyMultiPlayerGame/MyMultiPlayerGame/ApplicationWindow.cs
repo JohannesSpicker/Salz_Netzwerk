@@ -13,20 +13,22 @@ namespace MyMultiPlayerGame
     {
         private const int SERVERPORT = 1996;
 
-        private TcpListener listener = 
+        private TcpListener listener =
             new TcpListener(IPAddress.Parse("127.0.0.1"), SERVERPORT);
 
         private NetworkConnection connection;
-        private Game.Game myGame = new Game.Game();
+        //private Game.Game myGame = new Game.Game();
+        private Game.Game myGame;
         private Canvas canvas;
         private bool isServer;
 
         private ConcurrentQueue<MessageBase> IncomingNetworkMessages = new ConcurrentQueue<MessageBase>();
-        
+
         public ApplicationWindow()
         {
             InitializeComponent();
 
+            this.myGame = new Game.Game(this);
             this.canvas = new Canvas(this.myGame);
             this.canvas.Size = new Size(600, 300);
             this.canvas.Location = new Point(10, 100);
@@ -91,7 +93,6 @@ namespace MyMultiPlayerGame
             }
         }
 
-
         private void ProcessNetworkMessages()
         {
             while (IncomingNetworkMessages.TryDequeue(out var message))
@@ -106,7 +107,8 @@ namespace MyMultiPlayerGame
                     StartGame m = (StartGame)message;
                     // I am a client, StartGame comes from server
                     this.myGame.Start(m.numPlayers, m.myPlayerNumber, new List<NetworkConnection>() { connection });
-
+                    DisplayChatmessage(">>> GAME HAS STARTED <<<");
+                    buttonReady.Enabled = false;
                 }
                 else if (message is GameInput)
                 {
@@ -114,7 +116,7 @@ namespace MyMultiPlayerGame
                 }
                 else if (message is ReadyMessage)
                 {
-                    this.myGame.ReceiveReadyInput(this, (ReadyMessage)message);
+                    this.myGame.ReceiveReadyInput((ReadyMessage)message);
                 }
             }
         }
@@ -145,7 +147,9 @@ namespace MyMultiPlayerGame
             }
         }
 
-        private void buttonStartGame_Click(object sender, EventArgs e)
+        private void buttonStartGame_Click(object sender, EventArgs e) => StartTry();
+
+        public void StartTry()
         {
             if (isServer)
             {
@@ -165,6 +169,7 @@ namespace MyMultiPlayerGame
                     });
 
                     buttonReady.Enabled = false;
+                    DisplayChatmessage(">>> GAME HAS STARTED <<<");
                 }
                 else
                     DisplayChatmessage("Both players need to be ready for the game to start.");
@@ -191,6 +196,14 @@ namespace MyMultiPlayerGame
 
                 connection.Send(msg);//send ready message to other client
             }
+
+            StartTry();
         }
+
+        public void ChangeEnergyLabel() => labelMyEnergy.Text = "Energy: " + myGame.myEnergy.ToString("#0.0");
+        public void ChangeMyHealthLabel() => labelMyEnergy.Text = "My health: " + myGame.myHealth.ToString();
+        public void ChangeOppHealthLabel() => labelMyEnergy.Text = "Enemy health: " + myGame.oppHealth.ToString();
+
+        private void label3_Click(object sender, EventArgs e) => buttonReady.BackColor = Color.White;
     }
 }
