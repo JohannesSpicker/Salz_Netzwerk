@@ -272,10 +272,12 @@ namespace MyMultiPlayerGame.Game
 
         public void RemoveSoldierFromlists(Soldier soldier)
         {
+            /*
             if (allGameObjects.Contains(soldier))
                 allGameObjects.Remove(soldier);
             if (allSoldiers.Contains(soldier))
                 allSoldiers.Remove(soldier);
+            */
         }
     }
 }

@@ -41,8 +41,8 @@ namespace MyMultiPlayerGame.Game
 
             float dist = (float)Math.Sqrt(sqDist);
 
-            float xDirection = (X - xTarget) / dist;//normalized x direction
-            float yDirection = (Y - yTarget) / dist;//normalized y direction
+            float xDirection = (xTarget - X) / dist;//normalized x direction
+            float yDirection = (yTarget - Y) / dist;//normalized y direction
 
             X += xDirection * moveDistance;
             Y += yDirection * moveDistance;
