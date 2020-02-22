@@ -19,6 +19,7 @@ namespace MyMultiPlayerGame.Game
         int simStepCount;
         List<GameObject> allGameObjects = new List<GameObject>();
         List<Soldier> allSoldiers = new List<Soldier>();
+        List<GameObject> allGarbage = new List<GameObject>();
 
         public class InputEvent
         {
@@ -174,7 +175,7 @@ namespace MyMultiPlayerGame.Game
                 var input = this.collectedInputEvents[i];
                 if (input.UnitTypePlaced > 0)
                 {
-                    Soldier soldier = new Soldier(this, i, Soldier.SoldierType.CrudeCommoner)
+                    Soldier soldier = new Soldier(this, i, Soldier.SoldierType.AchyArcher)
                     {
                         X = input.X,
                         Y = input.Y
@@ -208,12 +209,9 @@ namespace MyMultiPlayerGame.Game
                 }
             }
 
-            myEnergy -= 0.1f;//recover energy
-
-            foreach (Soldier soldier in allSoldiers)
-            {
-                soldier.FireTickTock();
-            }
+            myEnergy += 0.1f;//recover energy
+            
+            CollectGarbage();
         }
 
         public void Render(Graphics g)
@@ -270,14 +268,38 @@ namespace MyMultiPlayerGame.Game
             return new Tuple<Soldier, bool>(bestCandidate, isInAttackRange);
         }
 
-        public void RemoveSoldierFromlists(Soldier soldier)
+        public void PutIntoGarbage(Soldier soldier) => allGarbage.Add(soldier);
+
+        private void CollectGarbage()
         {
-            /*
-            if (allGameObjects.Contains(soldier))
-                allGameObjects.Remove(soldier);
-            if (allSoldiers.Contains(soldier))
-                allSoldiers.Remove(soldier);
-            */
+            foreach (GameObject o in allGarbage)
+            {
+                if (allGameObjects.Contains(o))
+                    allGameObjects.Remove(o);
+                if (o is Soldier && allSoldiers.Contains((Soldier)o))
+                    allSoldiers.Remove((Soldier)o);
+            }
+
+            allGarbage.Clear();
+        }
+
+        private void CheckGameEnd()
+        {
+            if (!appWindow.isServer || (0 < myHealth && 0 < oppHealth))//early skip on client side, or both players alive
+                return;
+
+            if (myHealth <= 0 && oppHealth <= 0)
+            {
+                //TIE
+            }
+            else if (myHealth <= 0)
+            {
+                //SERVER LOSS
+            }
+            else
+            {
+                //CLIENT LOSS
+            }
         }
     }
 }

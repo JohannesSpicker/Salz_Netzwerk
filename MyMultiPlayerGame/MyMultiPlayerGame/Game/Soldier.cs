@@ -73,13 +73,15 @@ namespace MyMultiPlayerGame.Game
 
         public override void NextSimulationStep(Game myGame)
         {
+            FireTickTock();
+
             if ((this.Player == 0 && this.X + this.FireRange >= this.Game.boardWidth) ||
-                (this.Player == 1 && this.X - this.FireRange <= 0))
+                (this.Player == 1 && this.X - this.FireRange <= 0))//enemy player in range
             {
-                // enemy player in range!
                 if (ShotReady)
                 {
                     //shoot enemy player
+                    myGame.oppHealth -= this.Damage;
                     ResetFireTicker();
                 }
 
@@ -92,16 +94,19 @@ namespace MyMultiPlayerGame.Game
             {
                 if (ShotReady)
                 {
+                    //shoot target
                     target.Item1.TakeDamage(Damage);
                     ResetFireTicker();
                 }
             }
             else if (target.Item1 != this)//target is in view range
             {
+                //go to target
                 Move(target.Item1.X, target.Item1.Y, Speed);
             }
-            else//go to enemy player
+            else
             {
+                //go to enemy player
                 if (this.Player == 0)
                     this.X += this.Speed;
                 else
@@ -113,12 +118,24 @@ namespace MyMultiPlayerGame.Game
         {
             const float radius = 10;
 
-            g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
-
-            //TODO: INSERT RENDER SWITCH
+            switch (Type)
+            {
+                case SoldierType.AchyArcher:
+                    g.FillPie(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2, 160, 180);
+                    break;
+                case SoldierType.BlindBertha:
+                    g.FillRectangle(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
+                    break;
+                case SoldierType.CrudeCommoner:
+                    g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
+                    break;
+                default:
+                    g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
+                    break;
+            }
         }
 
-        public void FireTickTock() => FireTicker -= 0.1f;
+        private void FireTickTock() => FireTicker -= 0.1f;
         private void ResetFireTicker() => FireTicker = FireFrequency;
 
         public void TakeDamage(int dmg)
@@ -129,6 +146,6 @@ namespace MyMultiPlayerGame.Game
                 Die();
         }
 
-        private void Die() => Game.RemoveSoldierFromlists(this);
+        private void Die() => Game.PutIntoGarbage(this);
     }
 }

@@ -20,7 +20,7 @@ namespace MyMultiPlayerGame
         //private Game.Game myGame = new Game.Game();
         private Game.Game myGame;
         private Canvas canvas;
-        private bool isServer;
+        public bool isServer { get; private set; }
 
         private ConcurrentQueue<MessageBase> IncomingNetworkMessages = new ConcurrentQueue<MessageBase>();
 
