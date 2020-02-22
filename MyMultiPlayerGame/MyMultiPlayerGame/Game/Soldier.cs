@@ -81,7 +81,11 @@ namespace MyMultiPlayerGame.Game
                 if (ShotReady)
                 {
                     //shoot enemy player
-                    myGame.oppHealth -= this.Damage;
+                    if (this.Player == myGame.myPlayerNumber)
+                        myGame.oppHealth -= this.Damage;
+                    else
+                        myGame.myHealth -= this.Damage;
+
                     ResetFireTicker();
                 }
 

@@ -16,7 +16,6 @@ namespace MyMultiPlayerGame.Messages
             StopGame,
             GameInput,
             ReadyMessage,
-            //...
         }
 
         public abstract MessageTypes MessageType { get; }
@@ -27,7 +26,7 @@ namespace MyMultiPlayerGame.Messages
             BinaryWriter writer = new BinaryWriter(memStream);
 
             writer.Write((int)this.MessageType);
-            writer.Write(0); // size placeholder!
+            writer.Write(0);//size placeholder
             Send(writer);
 
             long size = memStream.Length;
@@ -59,6 +58,7 @@ namespace MyMultiPlayerGame.Messages
                     m = new StartGame();
                     break;
                 case MessageTypes.StopGame:
+                    m = new StopGame();
                     break;
                 case MessageTypes.GameInput:
                     m = new GameInput();

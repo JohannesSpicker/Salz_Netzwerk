@@ -66,6 +66,7 @@
     <Compile Include="Messages\ChatMessage.cs" />
     <Compile Include="Messages\GameInput.cs" />
     <Compile Include="Messages\MessageBase.cs" />
+    <Compile Include="Messages\StopGame.cs" />
     <Compile Include="Messages\StartGame.cs" />
     <Compile Include="NetworkConnection.cs" />
     <Compile Include="Program.cs" />

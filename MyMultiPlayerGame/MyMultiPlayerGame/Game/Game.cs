@@ -42,8 +42,26 @@ namespace MyMultiPlayerGame.Game
         public bool isMeReady = false;
         public bool isOppReady = false;
 
-        public int myHealth = 100;
-        public int oppHealth = 100;
+        public int myHealth
+        {
+            get => myHealthBackingField;
+            set
+            {
+                myHealthBackingField = Math.Max(Math.Min(value, 100), 0);
+                appWindow.ChangeMyHealthLabel();
+            }
+        }
+        private int myHealthBackingField = 100;
+        public int oppHealth
+        {
+            get => oppHealthbackingField;
+            set
+            {
+                oppHealthbackingField = Math.Max(Math.Min(value, 100), 0);
+                appWindow.ChangeOppHealthLabel();
+            }
+        }
+        private int oppHealthbackingField = 100;
         public float myEnergy
         {
             get => myEnergyBackingField;
@@ -55,6 +73,7 @@ namespace MyMultiPlayerGame.Game
         }
         private float myEnergyBackingField = 10f;
 
+        #region Setup + End
         public void ReceiveReadyInput(ReadyMessage message)
         {
             this.isOppReady = message.isReady;
@@ -76,18 +95,52 @@ namespace MyMultiPlayerGame.Game
             this.peers = peers;
 
             this.allGameObjects.Clear();
-
+            this.allSoldiers.Clear();
+            this.allGarbage.Clear();
 
             SendInput();
 
             System.Diagnostics.Debug.WriteLine("Start() end");
         }
 
-        public void Stop()
+        /// <summary>
+        /// Checks for game end and sends StopGame messages appropriately.
+        /// </summary>
+        private void CheckGameEnd()
         {
-            this.running = false;
+            if (!appWindow.isServer || (0 < myHealth && 0 < oppHealth))//early skip on client side, or both players alive
+                return;
+
+            if (myHealth <= 0 && oppHealth <= 0)
+            {
+                //TIE
+            }
+            else if (myHealth <= 0)
+            {
+                //SERVER LOSS
+            }
+            else
+            {
+                //CLIENT LOSS
+            }
         }
 
+        public void ReceiveStopInput(StopGame message)
+        {
+            if (message.isTie)
+                appWindow.DisplayChatmessage(">>> GAME IS A TIE <<<");
+            else if (message.isReceiverWinner)
+                appWindow.DisplayChatmessage(">>> YOU WON <<<");
+            else
+                appWindow.DisplayChatmessage(">>> YOU LOST <<<");
+
+            Stop();
+        }
+
+        public void Stop() => this.running = false;
+        #endregion
+
+        #region GameLoop
         protected void SendInput()
         {
             System.Diagnostics.Debug.WriteLine("SendInput()");
@@ -210,8 +263,9 @@ namespace MyMultiPlayerGame.Game
             }
 
             myEnergy += 0.1f;//recover energy
-            
+
             CollectGarbage();
+            CheckGameEnd();
         }
 
         public void Render(Graphics g)
@@ -221,7 +275,9 @@ namespace MyMultiPlayerGame.Game
                 o.Render(g);
             }
         }
+        #endregion
 
+        #region Soldier Helpers
         public void SpawnSoldier(float x, float y)
         {
             if (!running)
@@ -267,7 +323,9 @@ namespace MyMultiPlayerGame.Game
 
             return new Tuple<Soldier, bool>(bestCandidate, isInAttackRange);
         }
+        #endregion
 
+        #region Garbage
         public void PutIntoGarbage(Soldier soldier) => allGarbage.Add(soldier);
 
         private void CollectGarbage()
@@ -282,24 +340,6 @@ namespace MyMultiPlayerGame.Game
 
             allGarbage.Clear();
         }
-
-        private void CheckGameEnd()
-        {
-            if (!appWindow.isServer || (0 < myHealth && 0 < oppHealth))//early skip on client side, or both players alive
-                return;
-
-            if (myHealth <= 0 && oppHealth <= 0)
-            {
-                //TIE
-            }
-            else if (myHealth <= 0)
-            {
-                //SERVER LOSS
-            }
-            else
-            {
-                //CLIENT LOSS
-            }
-        }
+        #endregion
     }
 }

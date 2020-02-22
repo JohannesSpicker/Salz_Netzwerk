@@ -118,6 +118,10 @@ namespace MyMultiPlayerGame
                 {
                     this.myGame.ReceiveReadyInput((ReadyMessage)message);
                 }
+                else if (message is StopGame)
+                {
+                    this.myGame.ReceiveStopInput((StopGame)message);
+                }
             }
         }
 
@@ -176,6 +180,15 @@ namespace MyMultiPlayerGame
             }
         }
 
+        public void SendStopMsg(bool isTie, bool isReceiverWinner)
+        {
+            this.connection.Send(new StopGame()
+            {
+                isTie = isTie,
+                isReceiverWinner = isReceiverWinner
+            });
+        }
+
         private void buttonReady_Click(object sender, EventArgs e) => ReadyToggle();
 
         private void ReadyToggle()
@@ -201,8 +214,8 @@ namespace MyMultiPlayerGame
         }
 
         public void ChangeEnergyLabel() => labelMyEnergy.Text = "Energy: " + myGame.myEnergy.ToString("#0.0");
-        public void ChangeMyHealthLabel() => labelMyEnergy.Text = "My health: " + myGame.myHealth.ToString();
-        public void ChangeOppHealthLabel() => labelMyEnergy.Text = "Enemy health: " + myGame.oppHealth.ToString();
+        public void ChangeMyHealthLabel() => labelHealthMe.Text = "My health: " + myGame.myHealth.ToString();
+        public void ChangeOppHealthLabel() => labelHealthEnemy.Text = "Enemy health: " + myGame.oppHealth.ToString();
 
         private void label3_Click(object sender, EventArgs e) => buttonReady.BackColor = Color.White;
     }
