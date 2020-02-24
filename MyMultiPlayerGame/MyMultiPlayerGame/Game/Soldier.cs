@@ -5,7 +5,7 @@ namespace MyMultiPlayerGame.Game
 {
     class Soldier : GameObject
     {
-        public enum SoldierType { AchyArcher, BlindBertha, CrudeCommoner }
+        public enum SoldierType { NONE, AchyArcher, BlindBertha, CrudeCommoner }
 
         public SoldierType Type { get; private set; }
         public int HP { get; private set; }
@@ -28,44 +28,45 @@ namespace MyMultiPlayerGame.Game
                     this.Type = type;
                     this.Player = player;
                     this.HP = 5;
-                    this.Speed = 4;
+                    this.Speed = 3.5f;
                     this.Damage = 3;
                     this.FireFrequency = 0.75f;
-                    this.ViewRange = 400;
-                    this.FireRange = 200;
+                    this.ViewRange = 300f;
+                    this.FireRange = 150f;
                     this.FireTicker = this.FireFrequency;
                     break;
                 case SoldierType.BlindBertha:
                     this.Type = type;
                     this.Player = player;
                     this.HP = 30;
-                    this.Speed = 2;
+                    this.Speed = 2f;
                     this.Damage = 5;
                     this.FireFrequency = 1.5f;
-                    this.ViewRange = 100;
-                    this.FireRange = 50;
+                    this.ViewRange = 100f;
+                    this.FireRange = 50f;
                     this.FireTicker = this.FireFrequency;
                     break;
                 case SoldierType.CrudeCommoner:
                     this.Type = type;
                     this.Player = player;
                     this.HP = 10;
-                    this.Speed = 5;
+                    this.Speed = 5f;
                     this.Damage = 3;
                     this.FireFrequency = 0.5f;
-                    this.ViewRange = 200;
-                    this.FireRange = 100;
+                    this.ViewRange = 200f;
+                    this.FireRange = 100f;
                     this.FireTicker = this.FireFrequency;
                     break;
-                default:
+				case SoldierType.NONE:
+				default:
                     this.Type = type;
                     this.Player = player;
                     this.HP = 10;
-                    this.Speed = 5;
+                    this.Speed = 5f;
                     this.Damage = 3;
                     this.FireFrequency = 0.5f;
-                    this.ViewRange = 200;
-                    this.FireRange = 100;
+                    this.ViewRange = 200f;
+                    this.FireRange = 100f;
                     this.FireTicker = this.FireFrequency;
                     break;
             }
@@ -125,7 +126,7 @@ namespace MyMultiPlayerGame.Game
             switch (Type)
             {
                 case SoldierType.AchyArcher:
-                    g.FillPie(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2, 160, 180);
+                    g.FillPie(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2, 40, 300);
                     break;
                 case SoldierType.BlindBertha:
                     g.FillRectangle(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
@@ -133,6 +134,7 @@ namespace MyMultiPlayerGame.Game
                 case SoldierType.CrudeCommoner:
                     g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
                     break;
+				case SoldierType.NONE:
                 default:
                     g.FillEllipse(this.Player == 0 ? Brushes.Red : Brushes.Yellow, this.X - radius, this.Y - radius, radius * 2, radius * 2);
                     break;
